@@ -1,0 +1,11 @@
+{
+    "socialNetwork": {
+        "dbConfig": {
+            "host": "",
+            "port": 3000,
+            "dbName": "social_network",
+            "dbUsername": "ashutosh",
+            "dbPassword": "Ashu123"
+        }
+    }
+}

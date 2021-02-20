@@ -1,0 +1,55 @@
+const bcrypt = require('bcrypt');
+const config = require('config');
+const jwt = require('jsonwebtoken');
+const Joi = require('joi');
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required
+  },
+  email: {
+    type: String,
+    required
+  }, 
+  passowrd: {
+    type: String,
+    required
+  }
+});
+
+const User = mongoose.model('User', userSchema);
+
+userSchema.pre('save', async function (next) {
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+userSchema.post('save', function (doc, next) {
+  console.log('new user was created and saved to DB');
+  next();
+});
+
+userSchema.methods.generateAuthToken = function (params) {
+  const token = jwt.sign({username: this.username, isAdmin: this.isAdmin}, config.get('jwtPrivateKey'), {/*expiresIn: '1h'*/});
+  // the second parameter is to be taken during runtime from env vars, via cfgs.
+  // check config folder -> default.json and custom-environment-variables.json 
+  return token;
+}
+
+function validateRegistration(user) {
+  const schema = {
+      name: Joi.string().min(2).max(255).required(),
+      email: Joi.string().min(5).max(255).required().email(),
+      password: Joi.string().min(5).max(255).required()
+  }
+
+  return Joi.validate(user, schema);
+}
+
+module.exports.User = User;
+module.exports.validateRegistration = validateRegistration;
+
+module.exports.User = User;
